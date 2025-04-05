@@ -1,8 +1,8 @@
 /**
- * OIDC Authentication Widget
- * Handles OIDC authentication flow with PKCE
+ * Next Identity Authentication Widget
+ * Handles Next Identity authentication flow with PKCE
  */
-class OIDCWidget {
+class NIWidget {
   constructor(config) {
     this.config = config;
     this.state = {};
@@ -33,7 +33,7 @@ class OIDCWidget {
   setupEventListeners() {
     document.addEventListener('DOMContentLoaded', () => {
       // Find all auth buttons in the widget
-      const authButtons = document.querySelectorAll('.oidc-auth-button');
+      const authButtons = document.querySelectorAll('.ni-auth-button');
       
       authButtons.forEach(button => {
         button.addEventListener('click', (e) => {
@@ -87,14 +87,14 @@ class OIDCWidget {
       providerId,
       timestamp: Date.now()
     };
-    localStorage.setItem('oidc_auth_state', JSON.stringify(stateData));
+    localStorage.setItem('ni_auth_state', JSON.stringify(stateData));
   }
 
   /**
    * Get stored auth state from localStorage
    */
   getStoredAuthState() {
-    const stateData = localStorage.getItem('oidc_auth_state');
+    const stateData = localStorage.getItem('ni_auth_state');
     if (!stateData) return null;
     
     try {
@@ -109,17 +109,17 @@ class OIDCWidget {
    * Clear stored auth state
    */
   clearStoredAuthState() {
-    localStorage.removeItem('oidc_auth_state');
+    localStorage.removeItem('ni_auth_state');
   }
 
   /**
    * Store token data
    */
   storeTokenData(tokenData) {
-    localStorage.setItem('oidc_token_data', JSON.stringify(tokenData));
+    localStorage.setItem('ni_token_data', JSON.stringify(tokenData));
     
     // Dispatch event for token received
-    const event = new CustomEvent('oidc:tokens_received', {
+    const event = new CustomEvent('ni:tokens_received', {
       detail: tokenData
     });
     document.dispatchEvent(event);
@@ -129,7 +129,7 @@ class OIDCWidget {
    * Get stored token data
    */
   getStoredTokenData() {
-    const tokenData = localStorage.getItem('oidc_token_data');
+    const tokenData = localStorage.getItem('ni_token_data');
     if (!tokenData) return null;
     
     try {
@@ -144,7 +144,7 @@ class OIDCWidget {
    * Clear stored token data
    */
   clearStoredTokenData() {
-    localStorage.removeItem('oidc_token_data');
+    localStorage.removeItem('ni_token_data');
   }
 
   /**
@@ -195,7 +195,7 @@ class OIDCWidget {
       authUrl.searchParams.append('code_challenge_method', this.config.pkce.challengeMethod);
       
       // Dispatch event for login initiated
-      const event = new CustomEvent('oidc:login_initiated', {
+      const event = new CustomEvent('ni:login_initiated', {
         detail: { providerId }
       });
       document.dispatchEvent(event);
@@ -206,7 +206,7 @@ class OIDCWidget {
       console.error('Login initiation failed:', e);
       
       // Dispatch error event
-      const event = new CustomEvent('oidc:error', {
+      const event = new CustomEvent('ni:error', {
         detail: { 
           error: 'login_failed',
           errorDescription: e.message
@@ -267,7 +267,7 @@ class OIDCWidget {
       window.history.replaceState({}, document.title, window.location.pathname);
       
       // Dispatch authenticated event
-      const event = new CustomEvent('oidc:authenticated', {
+      const event = new CustomEvent('ni:authenticated', {
         detail: {
           user: idTokenPayload,
           providerId: storedStateData.providerId
@@ -284,7 +284,7 @@ class OIDCWidget {
       window.history.replaceState({}, document.title, window.location.pathname);
       
       // Dispatch error event
-      const event = new CustomEvent('oidc:error', {
+      const event = new CustomEvent('ni:error', {
         detail: { 
           error: 'callback_failed',
           errorDescription: e.message
@@ -331,7 +331,7 @@ class OIDCWidget {
     this.clearStoredTokenData();
     
     // Dispatch logout event
-    const event = new CustomEvent('oidc:logout', {
+    const event = new CustomEvent('ni:logout', {
       detail: tokenData ? { providerId: tokenData.providerId } : {}
     });
     document.dispatchEvent(event);
@@ -360,22 +360,22 @@ class OIDCWidget {
     const root = document.documentElement;
     
     // Set CSS variables
-    root.style.setProperty('--oidc-button-radius', customization.buttonRadius);
-    root.style.setProperty('--oidc-button-color', customization.buttonColor);
-    root.style.setProperty('--oidc-button-text-color', customization.buttonTextColor);
-    root.style.setProperty('--oidc-font-family', customization.fontFamily);
-    root.style.setProperty('--oidc-widget-width', customization.widgetWidth);
+    root.style.setProperty('--ni-button-radius', customization.buttonRadius);
+    root.style.setProperty('--ni-button-color', customization.buttonColor);
+    root.style.setProperty('--ni-button-text-color', customization.buttonTextColor);
+    root.style.setProperty('--ni-font-family', customization.fontFamily);
+    root.style.setProperty('--ni-widget-width', customization.widgetWidth);
   }
 }
 
 // Initialize widget when config is available
 document.addEventListener('DOMContentLoaded', () => {
   // Use global config if available
-  if (window.OIDCWidgetConfig) {
-    window.oidcWidget = new OIDCWidget(window.OIDCWidgetConfig);
+  if (window.NIWidgetConfig) {
+    window.niWidget = new NIWidget(window.NIWidgetConfig);
   } else {
-    console.error('OIDC Widget configuration not found');
+    console.error('Next Identity Widget configuration not found');
   }
 });
 
-export default OIDCWidget; 
+export default NIWidget; 

@@ -1,8 +1,8 @@
 /**
- * OIDC Widget Configuration
+ * Next Identity Widget Configuration
  */
-const OIDCWidgetConfig = {
-  // The single OIDC issuer URL
+const NIWidgetConfig = {
+  // The single Next Identity issuer URL
   issuerUrl: 'https://example.auth.server.com',
   
   // Redirect URI - same page
@@ -51,7 +51,7 @@ const OIDCWidgetConfig = {
     widgetWidth: '300px'
   },
   
-  // OIDC scope
+  // Next Identity scope
   scope: 'openid profile email',
   
   // PKCE settings
@@ -62,7 +62,7 @@ const OIDCWidgetConfig = {
 
 // Make config globally available
 if (typeof window !== 'undefined') {
-  window.OIDCWidgetConfig = OIDCWidgetConfig;
+  window.NIWidgetConfig = NIWidgetConfig;
 }
 
-export default OIDCWidgetConfig; 
+export default NIWidgetConfig; 
