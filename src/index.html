@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Next Identity Authentication</title>
+  
+  <!-- Widget CSS -->
+  <link rel="stylesheet" href="css/ni-widget.min.css">
+</head>
+<body>
+  <!-- Next Identity Widget Container -->
+  <div class="ni-widget-container">
+    <div class="ni-widget-header">
+      <h2 class="ni-widget-title">Sign in</h2>
+      <p class="ni-widget-subtitle">Choose your preferred sign-in method</p>
+    </div>
+    
+    <div class="ni-auth-buttons">
+      <!-- Auth buttons will be dynamically generated based on the config -->
+    </div>
+    
+    <!-- Loading indicator -->
+    <div class="ni-loading">
+      <div class="ni-spinner"></div>
+    </div>
+    
+    <!-- Error message -->
+    <div class="ni-error"></div>
+  </div>
+
+  <!-- Config Script - Update path to your config file -->
+  <script src="config.js"></script>
+  
+  <!-- Widget Script -->
+  <script src="js/ni-widget.min.js"></script>
+</body>
+</html> 

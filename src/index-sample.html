@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Next Identity Authentication Widget Example</title>
+  
+  <!-- Widget CSS -->
+  <link rel="stylesheet" href="css/ni-widget.css">
+  
+  <!-- Demo page styling (not required for the widget) -->
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    
+    .demo-container {
+      max-width: 800px;
+      margin: 0 auto;
+      background-color: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+    }
+    
+    .demo-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    .demo-title {
+      font-size: 2rem;
+      color: #333;
+      margin-bottom: 10px;
+    }
+    
+    .demo-subtitle {
+      font-size: 1rem;
+      color: #666;
+    }
+    
+    .example-section {
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid #eee;
+    }
+    
+    .example-section h2 {
+      font-size: 1.5rem;
+      margin-bottom: 15px;
+    }
+    
+    pre {
+      background-color: #f8f9fa;
+      padding: 15px;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-family: monospace;
+      font-size: 0.9rem;
+    }
+    
+    .note {
+      background-color: #e8f4fd;
+      padding: 12px;
+      border-radius: 4px;
+      margin-top: 15px;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="demo-container">
+    <div class="demo-header">
+      <h1 class="demo-title">Next Identity Authentication Widget</h1>
+      <p class="demo-subtitle">A simple, customizable widget for Next Identity authentication</p>
+    </div>
+    
+    <!-- WIDGET IMPLEMENTATION STARTS HERE -->
+    <div class="ni-widget-container">
+      <div class="ni-widget-header">
+        <h2 class="ni-widget-title">Sign in</h2>
+        <p class="ni-widget-subtitle">Choose your preferred sign-in method</p>
+      </div>
+      
+      <div class="ni-auth-buttons">
+        <!-- Buttons will be dynamically generated based on config -->
+      </div>
+      
+      <!-- Loading indicator -->
+      <div class="ni-loading">
+        <div class="ni-spinner"></div>
+      </div>
+      
+      <!-- Error message -->
+      <div class="ni-error">
+        Authentication failed. Please try again.
+      </div>
+      
+      <!-- User profile (displayed after successful authentication) -->
+      <div class="ni-user-profile">
+        <div class="ni-user-avatar"></div>
+        <div class="ni-user-name"></div>
+        <div class="ni-user-email"></div>
+        <button class="ni-logout-button">Sign Out</button>
+      </div>
+    </div>
+    <!-- WIDGET IMPLEMENTATION ENDS HERE -->
+    
+    <div class="example-section">
+      <h2>How to Implement</h2>
+      <p>To implement the Next Identity Authentication Widget in your application, follow these steps:</p>
+      
+      <h3>1. Include the required files</h3>
+      <pre>&lt;link rel="stylesheet" href="path/to/ni-widget.css"&gt;
+&lt;script src="path/to/config.js"&gt;&lt;/script&gt;
+&lt;script src="path/to/ni-widget.js"&gt;&lt;/script&gt;</pre>
+      
+      <h3>2. Add the widget HTML</h3>
+      <pre>&lt;div class="ni-widget-container"&gt;
+  &lt;div class="ni-widget-header"&gt;
+    &lt;h2 class="ni-widget-title"&gt;Sign in&lt;/h2&gt;
+    &lt;p class="ni-widget-subtitle"&gt;Choose your preferred sign-in method&lt;/p&gt;
+  &lt;/div&gt;
+  
+  &lt;div class="ni-auth-buttons"&gt;
+    &lt;!-- Buttons will be dynamically generated --&gt;
+  &lt;/div&gt;
+  
+  &lt;!-- Loading indicator --&gt;
+  &lt;div class="ni-loading"&gt;
+    &lt;div class="ni-spinner"&gt;&lt;/div&gt;
+  &lt;/div&gt;
+  
+  &lt;!-- Error message --&gt;
+  &lt;div class="ni-error"&gt;
+    Authentication failed. Please try again.
+  &lt;/div&gt;
+  
+  &lt;!-- User profile (displayed after successful authentication) --&gt;
+  &lt;div class="ni-user-profile"&gt;
+    &lt;div class="ni-user-avatar"&gt;&lt;/div&gt;
+    &lt;div class="ni-user-name"&gt;&lt;/div&gt;
+    &lt;div class="ni-user-email"&gt;&lt;/div&gt;
+    &lt;button class="ni-logout-button"&gt;Sign Out&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+      
+      <h3>3. Configure the widget</h3>
+      <p>Edit the <code>config.js</code> file to set your Next Identity provider details:</p>
+      <pre>const NIWidgetConfig = {
+  // The single Next Identity issuer URL
+  issuerUrl: 'https://your-provider.com',
+  
+  // Redirect URI - same page
+  redirectUri: window.location.origin + window.location.pathname,
+  
+  // Auth providers with their client IDs
+  providers: [
+    {
+      id: 'google',
+      name: 'Google',
+      clientId: 'your-client-id-for-google',
+      icon: 'google'
+    },
+    // Add more providers as needed
+  ],
+  
+  // Customization options
+  customization: {
+    buttonRadius: '4px',
+    buttonColor: '#4285F4',
+    buttonTextColor: '#ffffff',
+    fontFamily: "'Roboto', sans-serif",
+    widgetWidth: '300px'
+  },
+  
+  // Next Identity scope
+  scope: 'openid profile email',
+  
+  // PKCE settings
+  pkce: {
+    challengeMethod: 'S256'
+  }
+};</pre>
+      
+      <h3>4. Handle authentication events</h3>
+      <p>Listen for events to handle authentication state changes:</p>
+      <pre>// Listen for successful authentication
+document.addEventListener('ni:authenticated', (event) => {
+  const userData = event.detail.user;
+  console.log('User authenticated:', userData);
+  // Handle successful authentication
+});
+
+// Listen for token received
+document.addEventListener('ni:tokens_received', (event) => {
+  const tokenData = event.detail;
+  console.log('Tokens received:', tokenData);
+  // Handle tokens (e.g., store them securely)
+});
+
+// Listen for logout
+document.addEventListener('ni:logout', () => {
+  console.log('User logged out');
+  // Handle logout
+});
+
+// Listen for errors
+document.addEventListener('ni:error', (event) => {
+  const error = event.detail;
+  console.error('Authentication error:', error);
+  // Handle authentication errors
+});</pre>
+
+      <div class="note">
+        <strong>Note:</strong> This widget uses the Authorization Code flow with PKCE for secure authentication. 
+        The widget handles all aspects of the Next Identity flow, including token exchange and storing the authentication state securely.
+      </div>
+    </div>
+  </div>
+  
+  <!-- Config script -->
+  <script src="config.js"></script>
+  
+  <!-- Widget script -->
+  <script src="js/ni-widget.js"></script>
+  
+  <!-- Script to dynamically generate buttons -->
+  <script>
+    // Generate buttons dynamically based on config
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.NIWidgetConfig) {
+        const buttonContainer = document.querySelector('.ni-auth-buttons');
+        
+        // Clear existing content
+        buttonContainer.innerHTML = '';
+        
+        // Generate buttons for each provider
+        window.NIWidgetConfig.providers.forEach(provider => {
+          const button = document.createElement('button');
+          button.className = 'ni-auth-button';
+          button.setAttribute('data-provider-id', provider.id);
+          
+          const icon = document.createElement('span');
+          icon.className = `ni-provider-icon ni-icon-${provider.icon}`;
+          
+          const text = document.createElement('span');
+          text.className = 'ni-button-text';
+          text.textContent = `Continue with ${provider.name}`;
+          
+          button.appendChild(icon);
+          button.appendChild(text);
+          buttonContainer.appendChild(button);
+        });
+      }
+    });
+  </script>
+  
+  <!-- Demo script for event handling -->
+  <script>
+    // Example event listeners
+    document.addEventListener('ni:authenticated', (event) => {
+      const userData = event.detail.user;
+      console.log('User authenticated:', userData);
+      
+      // Update UI to show user is logged in
+      const userProfile = document.querySelector('.ni-user-profile');
+      const userName = document.querySelector('.ni-user-name');
+      const userEmail = document.querySelector('.ni-user-email');
+      const userAvatar = document.querySelector('.ni-user-avatar');
+      
+      // Display user info
+      if (userData.name) {
+        userName.textContent = userData.name;
+      }
+      
+      if (userData.email) {
+        userEmail.textContent = userData.email;
+      }
+      
+      if (userData.picture) {
+        userAvatar.style.backgroundImage = `url(${userData.picture})`;
+      }
+      
+      // Show profile section
+      userProfile.classList.add('active');
+      
+      // Hide buttons
+      document.querySelector('.ni-auth-buttons').style.display = 'none';
+    });
+    
+    document.addEventListener('ni:error', (event) => {
+      const error = event.detail;
+      console.error('Authentication error:', error);
+      
+      // Show error message
+      const errorElement = document.querySelector('.ni-error');
+      errorElement.textContent = error.errorDescription || 'Authentication failed. Please try again.';
+      errorElement.classList.add('active');
+      
+      // Hide loading
+      document.querySelector('.ni-loading').classList.remove('active');
+    });
+    
+    // Handle logout button
+    document.addEventListener('DOMContentLoaded', () => {
+      const logoutButton = document.querySelector('.ni-logout-button');
+      
+      logoutButton.addEventListener('click', () => {
+        // Call logout from widget
+        if (window.niWidget) {
+          window.niWidget.logout();
+          
+          // Reset UI
+          document.querySelector('.ni-user-profile').classList.remove('active');
+          document.querySelector('.ni-auth-buttons').style.display = 'flex';
+        }
+      });
+    });
+  </script>
+</body>
+</html> 
