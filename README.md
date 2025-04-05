@@ -1,4 +1,4 @@
-# Next Identity Authentication Widget
+# Next Identity Simple Social/Auth Login Widget
 
 A simple, customizable Single Page Application (SPA) widget for Next Identity authentication that can be easily integrated into any web application.
 
