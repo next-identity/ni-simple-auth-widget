@@ -3,7 +3,7 @@
  */
 const NIWidgetConfig = {
   // The single Next Identity issuer URL
-  issuerUrl: 'https://ajyc6qopjq-dev.idp.nextidentity.io',
+  issuerUrl: 'https://your-issuer-domain.nextidentity.io',
   
   // Redirect URI - same page
   redirectUri: window.location.origin + window.location.pathname,
@@ -19,31 +19,31 @@ const NIWidgetConfig = {
     {
       id: 'google',
       name: 'Google',
-      clientId: '1b95e536a1a44422b8b976db4462f098',
+      clientId: 'ni-google-client-id',
       icon: 'google'
     },
     {
       id: 'facebook',
       name: 'Facebook',
-      clientId: '234jdk4j3ndfkj3434kefkj34kjefk',
+      clientId: 'ni-facebook-client-id',
       icon: 'facebook'
     },
     {
       id: 'microsoft',
       name: 'Microsoft',
-      clientId: '345jdk4j3ndfkj3434kefkj34kjefk',
+      clientId: 'ni-microsoft-client-id',
       icon: 'microsoft'
     },
     {
       id: 'amazon',
       name: 'Amazon',
-      clientId: '456jdk4j3ndfkj3434kefkj34kjefk',
+      clientId: 'ni-amazon-client-id',
       icon: 'amazon'
     },
     {
       id: 'x',
       name: 'X',
-      clientId: '567jdk4j3ndfkj3434kefkj34kjefk',
+      clientId: 'ni-x-client-id',
       icon: 'x'
     }
   ],
