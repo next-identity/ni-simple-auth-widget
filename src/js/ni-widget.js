@@ -376,6 +376,4 @@ document.addEventListener('DOMContentLoaded', () => {
   } else {
     console.error('Next Identity Widget configuration not found');
   }
-});
-
-export default NIWidget; 
+}); 

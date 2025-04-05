@@ -63,6 +63,4 @@ const NIWidgetConfig = {
 // Make config globally available
 if (typeof window !== 'undefined') {
   window.NIWidgetConfig = NIWidgetConfig;
-}
-
-export default NIWidgetConfig; 
+} 
