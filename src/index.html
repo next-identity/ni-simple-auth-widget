@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OIDC Authentication Widget Example</title>
+  
+  <!-- Widget CSS -->
+  <link rel="stylesheet" href="css/oidc-widget.css">
+  
+  <!-- Demo page styling (not required for the widget) -->
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    
+    .demo-container {
+      max-width: 800px;
+      margin: 0 auto;
+      background-color: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+    }
+    
+    .demo-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    .demo-title {
+      font-size: 2rem;
+      color: #333;
+      margin-bottom: 10px;
+    }
+    
+    .demo-subtitle {
+      font-size: 1rem;
+      color: #666;
+    }
+    
+    .example-section {
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid #eee;
+    }
+    
+    .example-section h2 {
+      font-size: 1.5rem;
+      margin-bottom: 15px;
+    }
+    
+    pre {
+      background-color: #f8f9fa;
+      padding: 15px;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-family: monospace;
+      font-size: 0.9rem;
+    }
+    
+    .note {
+      background-color: #e8f4fd;
+      padding: 12px;
+      border-radius: 4px;
+      margin-top: 15px;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="demo-container">
+    <div class="demo-header">
+      <h1 class="demo-title">OIDC Authentication Widget</h1>
+      <p class="demo-subtitle">A simple, customizable widget for OIDC authentication</p>
+    </div>
+    
+    <!-- WIDGET IMPLEMENTATION STARTS HERE -->
+    <div class="oidc-widget-container">
+      <div class="oidc-widget-header">
+        <h2 class="oidc-widget-title">Sign in</h2>
+        <p class="oidc-widget-subtitle">Choose your preferred sign-in method</p>
+      </div>
+      
+      <div class="oidc-auth-buttons">
+        <!-- Google Sign-in -->
+        <button class="oidc-auth-button" data-provider-id="google">
+          <span class="oidc-provider-icon oidc-icon-google"></span>
+          <span class="oidc-button-text">Continue with Google</span>
+        </button>
+        
+        <!-- Facebook Sign-in -->
+        <button class="oidc-auth-button" data-provider-id="facebook">
+          <span class="oidc-provider-icon oidc-icon-facebook"></span>
+          <span class="oidc-button-text">Continue with Facebook</span>
+        </button>
+        
+        <!-- Microsoft Sign-in -->
+        <button class="oidc-auth-button" data-provider-id="microsoft">
+          <span class="oidc-provider-icon oidc-icon-microsoft"></span>
+          <span class="oidc-button-text">Continue with Microsoft</span>
+        </button>
+        
+        <!-- Amazon Sign-in -->
+        <button class="oidc-auth-button" data-provider-id="amazon">
+          <span class="oidc-provider-icon oidc-icon-amazon"></span>
+          <span class="oidc-button-text">Continue with Amazon</span>
+        </button>
+        
+        <!-- X Sign-in -->
+        <button class="oidc-auth-button" data-provider-id="x">
+          <span class="oidc-provider-icon oidc-icon-x"></span>
+          <span class="oidc-button-text">Continue with X</span>
+        </button>
+      </div>
+      
+      <!-- Loading indicator -->
+      <div class="oidc-loading">
+        <div class="oidc-spinner"></div>
+      </div>
+      
+      <!-- Error message -->
+      <div class="oidc-error">
+        Authentication failed. Please try again.
+      </div>
+      
+      <!-- User profile (displayed after successful authentication) -->
+      <div class="oidc-user-profile">
+        <div class="oidc-user-avatar"></div>
+        <div class="oidc-user-name"></div>
+        <div class="oidc-user-email"></div>
+        <button class="oidc-logout-button">Sign Out</button>
+      </div>
+    </div>
+    <!-- WIDGET IMPLEMENTATION ENDS HERE -->
+    
+    <div class="example-section">
+      <h2>How to Implement</h2>
+      <p>To implement the OIDC Authentication Widget in your application, follow these steps:</p>
+      
+      <h3>1. Include the required files</h3>
+      <pre>&lt;link rel="stylesheet" href="path/to/oidc-widget.css"&gt;
+&lt;script src="path/to/config.js"&gt;&lt;/script&gt;
+&lt;script src="path/to/oidc-widget.js"&gt;&lt;/script&gt;</pre>
+      
+      <h3>2. Add the widget HTML</h3>
+      <pre>&lt;div class="oidc-widget-container"&gt;
+  &lt;div class="oidc-widget-header"&gt;
+    &lt;h2 class="oidc-widget-title"&gt;Sign in&lt;/h2&gt;
+    &lt;p class="oidc-widget-subtitle"&gt;Choose your preferred sign-in method&lt;/p&gt;
+  &lt;/div&gt;
+  
+  &lt;div class="oidc-auth-buttons"&gt;
+    &lt;!-- Add buttons for each provider --&gt;
+    &lt;button class="oidc-auth-button" data-provider-id="google"&gt;
+      &lt;span class="oidc-provider-icon oidc-icon-google"&gt;&lt;/span&gt;
+      &lt;span class="oidc-button-text"&gt;Continue with Google&lt;/span&gt;
+    &lt;/button&gt;
+    
+    &lt;!-- Add more providers as needed --&gt;
+  &lt;/div&gt;
+  
+  &lt;!-- Loading indicator --&gt;
+  &lt;div class="oidc-loading"&gt;
+    &lt;div class="oidc-spinner"&gt;&lt;/div&gt;
+  &lt;/div&gt;
+  
+  &lt;!-- Error message --&gt;
+  &lt;div class="oidc-error"&gt;
+    Authentication failed. Please try again.
+  &lt;/div&gt;
+  
+  &lt;!-- User profile (displayed after successful authentication) --&gt;
+  &lt;div class="oidc-user-profile"&gt;
+    &lt;div class="oidc-user-avatar"&gt;&lt;/div&gt;
+    &lt;div class="oidc-user-name"&gt;&lt;/div&gt;
+    &lt;div class="oidc-user-email"&gt;&lt;/div&gt;
+    &lt;button class="oidc-logout-button"&gt;Sign Out&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+      
+      <h3>3. Configure the widget</h3>
+      <p>Edit the <code>config.js</code> file to set your OIDC provider details:</p>
+      <pre>const OIDCWidgetConfig = {
+  // The single OIDC issuer URL
+  issuerUrl: 'https://your-oidc-provider.com',
+  
+  // Redirect URI - same page
+  redirectUri: window.location.origin + window.location.pathname,
+  
+  // Auth providers with their client IDs
+  providers: [
+    {
+      id: 'google',
+      name: 'Google',
+      clientId: 'your-client-id-for-google',
+      icon: 'google'
+    },
+    // Add more providers as needed
+  ],
+  
+  // Customization options
+  customization: {
+    buttonRadius: '4px',
+    buttonColor: '#4285F4',
+    buttonTextColor: '#ffffff',
+    fontFamily: "'Roboto', sans-serif",
+    widgetWidth: '300px'
+  },
+  
+  // OIDC scope
+  scope: 'openid profile email',
+  
+  // PKCE settings
+  pkce: {
+    challengeMethod: 'S256'
+  }
+};</pre>
+      
+      <h3>4. Handle authentication events</h3>
+      <p>Listen for events to handle authentication state changes:</p>
+      <pre>// Listen for successful authentication
+document.addEventListener('oidc:authenticated', (event) => {
+  const userData = event.detail.user;
+  console.log('User authenticated:', userData);
+  // Handle successful authentication
+});
+
+// Listen for token received
+document.addEventListener('oidc:tokens_received', (event) => {
+  const tokenData = event.detail;
+  console.log('Tokens received:', tokenData);
+  // Handle tokens (e.g., store them securely)
+});
+
+// Listen for logout
+document.addEventListener('oidc:logout', () => {
+  console.log('User logged out');
+  // Handle logout
+});
+
+// Listen for errors
+document.addEventListener('oidc:error', (event) => {
+  const error = event.detail;
+  console.error('Authentication error:', error);
+  // Handle authentication errors
+});</pre>
+
+      <div class="note">
+        <strong>Note:</strong> This widget uses the Authorization Code flow with PKCE for secure authentication. 
+        The widget handles all aspects of the OIDC flow, including token exchange and storing the authentication state securely.
+      </div>
+    </div>
+  </div>
+  
+  <!-- Config script -->
+  <script src="config.js"></script>
+  
+  <!-- Widget script -->
+  <script src="js/oidc-widget.js"></script>
+  
+  <!-- Demo script for event handling -->
+  <script>
+    // Example event listeners
+    document.addEventListener('oidc:authenticated', (event) => {
+      const userData = event.detail.user;
+      console.log('User authenticated:', userData);
+      
+      // Update UI to show user is logged in
+      const userProfile = document.querySelector('.oidc-user-profile');
+      const userName = document.querySelector('.oidc-user-name');
+      const userEmail = document.querySelector('.oidc-user-email');
+      const userAvatar = document.querySelector('.oidc-user-avatar');
+      
+      // Display user info
+      if (userData.name) {
+        userName.textContent = userData.name;
+      }
+      
+      if (userData.email) {
+        userEmail.textContent = userData.email;
+      }
+      
+      if (userData.picture) {
+        userAvatar.style.backgroundImage = `url(${userData.picture})`;
+      }
+      
+      // Show profile section
+      userProfile.classList.add('active');
+      
+      // Hide buttons
+      document.querySelector('.oidc-auth-buttons').style.display = 'none';
+    });
+    
+    document.addEventListener('oidc:error', (event) => {
+      const error = event.detail;
+      console.error('Authentication error:', error);
+      
+      // Show error message
+      const errorElement = document.querySelector('.oidc-error');
+      errorElement.textContent = error.errorDescription || 'Authentication failed. Please try again.';
+      errorElement.classList.add('active');
+      
+      // Hide loading
+      document.querySelector('.oidc-loading').classList.remove('active');
+    });
+    
+    // Handle logout button
+    document.addEventListener('DOMContentLoaded', () => {
+      const logoutButton = document.querySelector('.oidc-logout-button');
+      
+      logoutButton.addEventListener('click', () => {
+        // Call logout from widget
+        if (window.oidcWidget) {
+          window.oidcWidget.logout();
+          
+          // Reset UI
+          document.querySelector('.oidc-user-profile').classList.remove('active');
+          document.querySelector('.oidc-auth-buttons').style.display = 'flex';
+        }
+      });
+    });
+  </script>
+</body>
+</html> 
