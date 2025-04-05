@@ -3,17 +3,23 @@
  */
 const NIWidgetConfig = {
   // The single Next Identity issuer URL
-  issuerUrl: 'https://example.auth.server.com',
+  issuerUrl: 'https://ajyc6qopjq-dev.idp.nextidentity.io',
   
   // Redirect URI - same page
   redirectUri: window.location.origin + window.location.pathname,
+  
+  // Post logout redirect URI - where to redirect after logout
+  postLogoutRedirectUri: window.location.origin + window.location.pathname,
+  
+  // Debug mode - set to true to enable console logging
+  debug: true,
   
   // Auth providers with their client IDs
   providers: [
     {
       id: 'google',
       name: 'Google',
-      clientId: '123jdk4j3ndfkj3434kefkj34kjefk',
+      clientId: '1b95e536a1a44422b8b976db4462f098',
       icon: 'google'
     },
     {

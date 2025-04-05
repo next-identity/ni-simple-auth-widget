@@ -117,10 +117,59 @@
   </div>
   
   <!-- Config script -->
-  <script src="config.js"></script>
+  <script src="./config.js"></script>
   
   <!-- Widget script -->
-  <script src="js/ni-widget.js"></script>
+  <script src="./js/ni-widget.js"></script>
+  
+  <!-- Enhanced verification script -->
+  <script>
+    console.log('Debug check: JavaScript is loading');
+    
+    // Check if config is available
+    console.log('NIWidgetConfig available:', !!window.NIWidgetConfig);
+    if (window.NIWidgetConfig) {
+      console.log('Debug mode enabled:', window.NIWidgetConfig.debug);
+      console.log('Provider count:', window.NIWidgetConfig.providers.length);
+    } else {
+      console.error('ERROR: NIWidgetConfig not found - check config.js loading');
+    }
+    
+    // Check if widget class is defined
+    console.log('NIWidget class available:', typeof NIWidget !== 'undefined');
+    
+    // Verify widget initialization
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('DOM loaded');
+      
+      // Check widget instance
+      console.log('niWidget instance available:', !!window.niWidget);
+      
+      // Check buttons
+      const buttons = document.querySelectorAll('.ni-auth-button');
+      console.log('Found auth buttons:', buttons.length);
+      
+      // Check if buttons have proper attributes
+      if (buttons.length > 0) {
+        buttons.forEach(btn => {
+          console.log('Button:', btn.getAttribute('data-provider-id'));
+          
+          // Add a manual event listener to test button clicks
+          btn.addEventListener('click', (e) => {
+            console.log('Manual test: Button clicked:', btn.getAttribute('data-provider-id'));
+          });
+        });
+      } else {
+        console.error('No auth buttons found. Button generation may have failed.');
+      }
+      
+      // Force widget initialization if not already done
+      if (!window.niWidget && window.NIWidgetConfig && typeof NIWidget !== 'undefined') {
+        console.log('Manually initializing widget...');
+        window.niWidget = new NIWidget(window.NIWidgetConfig);
+      }
+    });
+  </script>
   
   <!-- Script to dynamically generate buttons -->
   <script>
@@ -214,6 +263,26 @@
         }
       });
     });
+  </script>
+  
+  <!-- Direct widget initialization as a fallback -->
+  <script>
+    // Direct initialization as fallback - executed immediately after script loading
+    console.log('Attempting direct widget initialization...');
+    try {
+      if (typeof NIWidget === 'function' && window.NIWidgetConfig) {
+        if (!window.niWidget) {
+          console.log('Creating widget instance directly...');
+          window.niWidget = new NIWidget(window.NIWidgetConfig);
+        } else {
+          console.log('Widget already initialized');
+        }
+      } else {
+        console.error('Cannot initialize widget - NIWidget:', typeof NIWidget, 'Config:', !!window.NIWidgetConfig);
+      }
+    } catch (e) {
+      console.error('Error during direct widget initialization:', e);
+    }
   </script>
 </body>
 </html> 
