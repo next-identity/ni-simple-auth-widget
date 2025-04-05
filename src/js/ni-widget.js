@@ -29,6 +29,9 @@ class NIWidget {
       // First fetch OIDC configuration from discovery endpoint
       await this.fetchOIDCConfig();
       
+      // Check if we need to create the widget structure
+      this.ensureWidgetStructure();
+      
       // Then initialize state and event listeners
       this.initializeState();
       this.setupEventListeners();
@@ -104,10 +107,69 @@ class NIWidget {
     this.log('Initializing state. Code present:', !!code, 'State present:', !!state);
     
     if (code && state) {
+      // Clean up URL immediately to prevent accidental reuse
+      this.log('Cleaning up URL by removing query parameters');
+      window.history.replaceState({}, document.title, window.location.pathname);
+      
+      // Immediately show loading state
+      this.showAuthProcessingUI('Completing authentication...');
+      
+      // Handle the callback with the auth code
       this.handleCallback(code, state);
     } else {
-      // Clear any existing tokens if not in callback flow
-      this.clearStoredTokenData();
+      // Check if user is already authenticated
+      const tokenData = this.getStoredTokenData();
+      if (tokenData && tokenData.idTokenPayload) {
+        this.log('User already authenticated, updating UI');
+        // Update UI to show welcome message
+        this.updateUIAfterAuthentication(tokenData.idTokenPayload);
+      } else {
+        // Clear any existing tokens if not in callback flow
+        this.clearStoredTokenData();
+      }
+    }
+  }
+
+  /**
+   * Show authentication processing UI
+   */
+  showAuthProcessingUI(message = 'Processing authentication...') {
+    this.log('Showing auth processing UI');
+    
+    // Hide auth buttons if they exist
+    const authButtons = document.querySelector('.ni-auth-buttons');
+    if (authButtons) {
+      authButtons.style.display = 'none';
+    }
+    
+    // Show loading indicator
+    const loadingElem = document.querySelector('.ni-loading');
+    if (loadingElem) {
+      loadingElem.classList.add('active');
+    }
+    
+    // Create or update processing message
+    let processingMessage = document.querySelector('.ni-processing-message');
+    if (!processingMessage) {
+      processingMessage = document.createElement('div');
+      processingMessage.className = 'ni-processing-message';
+      
+      // Insert after header if exists, or at the beginning of container
+      const widgetContainer = document.querySelector('.ni-widget-container');
+      const widgetHeader = document.querySelector('.ni-widget-header');
+      
+      if (widgetContainer) {
+        if (widgetHeader) {
+          widgetContainer.insertBefore(processingMessage, widgetHeader.nextSibling);
+        } else {
+          widgetContainer.insertBefore(processingMessage, widgetContainer.firstChild);
+        }
+      }
+    }
+    
+    if (processingMessage) {
+      processingMessage.textContent = message;
+      processingMessage.style.display = 'block';
     }
   }
 
@@ -423,12 +485,6 @@ class NIWidget {
     try {
       this.log('Handling auth callback. Code present, state:', returnedState);
       
-      // Ensure we have discovered OIDC configuration
-      if (!this.discoveredConfig) {
-        this.log('OIDC configuration not available, fetching now...');
-        await this.fetchOIDCConfig();
-      }
-      
       // Get stored state data
       const storedStateData = this.getStoredAuthState();
       if (!storedStateData) {
@@ -451,6 +507,12 @@ class NIWidget {
       }
       
       this.log('Found provider configuration:', provider.name);
+      
+      // Ensure we have OIDC configuration before exchanging the code
+      if (!this.discoveredConfig) {
+        this.log('OIDC configuration not available, fetching now...');
+        await this.fetchOIDCConfig();
+      }
       
       // Exchange code for tokens
       this.log('Exchanging code for tokens');
@@ -480,9 +542,8 @@ class NIWidget {
       // Clear state data as it's no longer needed
       this.clearStoredAuthState();
       
-      // Clean up URL
-      this.log('Cleaning up URL by removing query parameters');
-      window.history.replaceState({}, document.title, window.location.pathname);
+      // Update UI to show welcome message
+      this.updateUIAfterAuthentication(idTokenPayload);
       
       // Dispatch authenticated event
       const event = new CustomEvent('ni:authenticated', {
@@ -499,9 +560,6 @@ class NIWidget {
       
       // Clear state data
       this.clearStoredAuthState();
-      
-      // Clean up URL
-      window.history.replaceState({}, document.title, window.location.pathname);
       
       // Dispatch error event
       const event = new CustomEvent('ni:error', {
@@ -520,15 +578,10 @@ class NIWidget {
   async exchangeCodeForTokens(code, codeVerifier, clientId) {
     this.log('Exchanging code for tokens with client ID:', clientId);
     
-    // Ensure we have discovered OIDC configuration
-    if (!this.discoveredConfig) {
-      this.log('OIDC configuration not available, fetching now...');
-      await this.fetchOIDCConfig();
-    }
-    
     // Use discovered token endpoint
     const tokenUrl = this.discoveredConfig.token_endpoint;
     
+    // Create payload
     const params = new URLSearchParams();
     params.append('grant_type', 'authorization_code');
     params.append('code', code);
@@ -537,38 +590,45 @@ class NIWidget {
     params.append('code_verifier', codeVerifier);
     
     this.log('Token request URL:', tokenUrl);
-    this.log('Token request parameters (to be sent in POST body):', {
+    this.log('Token request parameters:', {
       grant_type: 'authorization_code',
-      code: code.substring(0, 10) + '...',  // Only show beginning of code for security
+      code: code.substring(0, 10) + '...',
       redirect_uri: this.config.redirectUri,
       client_id: clientId,
-      code_verifier: codeVerifier.substring(0, 10) + '...'  // Only show beginning of verifier for security
+      code_verifier: codeVerifier.substring(0, 10) + '...'
     });
     
-    const response = await fetch(tokenUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      body: params
-    });
-    
-    if (!response.ok) {
-      const error = await response.json();
-      this.log('Token exchange failed. Status:', response.status, 'Error:', error);
-      throw new Error(error.error_description || 'Failed to exchange code for tokens');
+    try {
+      // Make token request
+      const response = await fetch(tokenUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: params
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        this.log('Token exchange failed. Status:', response.status, 'Error:', error);
+        throw new Error(error.error_description || `Failed to exchange code for tokens: ${response.status}`);
+      }
+      
+      const tokenData = await response.json();
+      this.log('Token exchange response received successfully');
+      return tokenData;
+    } catch (error) {
+      this.log('Error during token exchange:', error.message);
+      throw error;
     }
-    
-    this.log('Token exchange response received');
-    return await response.json();
   }
 
   /**
    * Logout user
    */
-  logout() {
+  async logout() {
     this.log('Logging out user');
     const tokenData = this.getStoredTokenData();
+    
+    // Clear local storage first
     this.clearStoredTokenData();
     
     // Dispatch logout event
@@ -578,19 +638,36 @@ class NIWidget {
     this.log('Dispatching logout event');
     document.dispatchEvent(event);
     
+    // Update UI
+    const welcomeContainer = document.querySelector('.ni-welcome-container');
+    const signInContainer = document.querySelector('.ni-widget-container');
+    if (welcomeContainer) {
+      welcomeContainer.style.display = 'none';
+    }
+    if (signInContainer) {
+      signInContainer.style.display = 'block';
+    }
+    
     // Use end_session_endpoint if available in discoveredConfig
     if (this.discoveredConfig && this.discoveredConfig.end_session_endpoint && tokenData) {
       try {
         this.log('End session endpoint found, redirecting for logout');
+        
+        // Find provider in config
+        const provider = this.config.providers.find(p => p.id === tokenData.providerId);
+        if (!provider) {
+          throw new Error(`Provider with ID ${tokenData.providerId} not found`);
+        }
+        
         const logoutUrl = new URL(this.discoveredConfig.end_session_endpoint);
-        // Add ID token hint if available
-        if (tokenData.idToken) {
-          logoutUrl.searchParams.append('id_token_hint', tokenData.idToken);
+        
+        // Add client_id parameter
+        if (provider.clientId) {
+          logoutUrl.searchParams.append('client_id', provider.clientId);
         }
-        // Add post_logout_redirect_uri if configured
-        if (this.config.postLogoutRedirectUri) {
-          logoutUrl.searchParams.append('post_logout_redirect_uri', this.config.postLogoutRedirectUri);
-        }
+        
+        // Add redirect_uri parameter
+        logoutUrl.searchParams.append('redirect_uri', this.config.redirectUri);
         
         this.log('Redirecting to end session endpoint:', logoutUrl.toString());
         window.location.href = logoutUrl.toString();
@@ -634,6 +711,164 @@ class NIWidget {
     root.style.setProperty('--ni-font-family', customization.fontFamily);
     root.style.setProperty('--ni-widget-width', customization.widgetWidth);
     this.log('Customizations applied successfully');
+  }
+
+  /**
+   * Update UI after successful authentication
+   */
+  updateUIAfterAuthentication(userInfo) {
+    this.log('Updating UI after authentication');
+    
+    // Find sign-in container
+    const signInContainer = document.querySelector('.ni-widget-container');
+    if (!signInContainer) {
+      this.log('Sign-in container not found');
+      return;
+    }
+    
+    // Get user's first name or fallback to generic welcome
+    let welcomeMessage = 'Welcome';
+    if (userInfo) {
+      const firstName = userInfo.given_name || userInfo.name?.split(' ')[0] || userInfo.preferred_username;
+      if (firstName) {
+        welcomeMessage = `Welcome, ${firstName}`;
+      }
+    }
+    
+    // Check if welcome message container already exists
+    let welcomeContainer = document.querySelector('.ni-welcome-container');
+    if (!welcomeContainer) {
+      // Create welcome container
+      welcomeContainer = document.createElement('div');
+      welcomeContainer.className = 'ni-welcome-container';
+      
+      // Add welcome message
+      const welcomeText = document.createElement('h2');
+      welcomeText.className = 'ni-welcome-text';
+      welcomeText.textContent = welcomeMessage;
+      welcomeContainer.appendChild(welcomeText);
+      
+      // Add sign out button
+      const signOutButton = document.createElement('button');
+      signOutButton.className = 'ni-sign-out-button';
+      signOutButton.textContent = 'Sign Out';
+      signOutButton.addEventListener('click', () => this.logout());
+      welcomeContainer.appendChild(signOutButton);
+      
+      // Replace sign-in container with welcome container
+      signInContainer.parentNode.replaceChild(welcomeContainer, signInContainer);
+    } else {
+      // Just update the welcome message
+      const welcomeText = welcomeContainer.querySelector('.ni-welcome-text');
+      if (welcomeText) {
+        welcomeText.textContent = welcomeMessage;
+      }
+      
+      // Show welcome container, hide sign-in container
+      welcomeContainer.style.display = 'block';
+      signInContainer.style.display = 'none';
+    }
+    
+    this.log('UI updated successfully with welcome message:', welcomeMessage);
+  }
+
+  /**
+   * Ensure widget DOM structure exists
+   */
+  ensureWidgetStructure() {
+    this.log('Ensuring widget structure exists');
+    
+    // First check if the minimal container exists
+    const rootElement = document.getElementById('ni-widget-root');
+    
+    // If the minimal container exists but doesn't have the widget container inside
+    if (rootElement && !rootElement.querySelector('.ni-widget-container')) {
+      this.log('Creating widget structure inside root element');
+      
+      // Create the widget container
+      const widgetContainer = document.createElement('div');
+      widgetContainer.className = 'ni-widget-container';
+      
+      // Create widget header
+      const widgetHeader = document.createElement('div');
+      widgetHeader.className = 'ni-widget-header';
+      
+      const widgetTitle = document.createElement('h2');
+      widgetTitle.className = 'ni-widget-title';
+      widgetTitle.textContent = 'Sign in';
+      
+      const widgetSubtitle = document.createElement('p');
+      widgetSubtitle.className = 'ni-widget-subtitle';
+      widgetSubtitle.textContent = 'Choose your preferred sign-in method';
+      
+      widgetHeader.appendChild(widgetTitle);
+      widgetHeader.appendChild(widgetSubtitle);
+      widgetContainer.appendChild(widgetHeader);
+      
+      // Create auth buttons container
+      const authButtons = document.createElement('div');
+      authButtons.className = 'ni-auth-buttons';
+      widgetContainer.appendChild(authButtons);
+      
+      // Create loading indicator
+      const loading = document.createElement('div');
+      loading.className = 'ni-loading';
+      const spinner = document.createElement('div');
+      spinner.className = 'ni-spinner';
+      loading.appendChild(spinner);
+      widgetContainer.appendChild(loading);
+      
+      // Create error message container
+      const error = document.createElement('div');
+      error.className = 'ni-error';
+      widgetContainer.appendChild(error);
+      
+      // Append the complete widget to the root element
+      rootElement.appendChild(widgetContainer);
+      this.log('Widget structure created successfully');
+    } else {
+      this.log('Widget structure already exists');
+    }
+    
+    // Now generate buttons based on config
+    this.generateButtons();
+  }
+  
+  /**
+   * Generate auth buttons based on config
+   */
+  generateButtons() {
+    this.log('Generating auth buttons based on config');
+    
+    // Find button container
+    const buttonContainer = document.querySelector('.ni-auth-buttons');
+    if (!buttonContainer) {
+      this.log('Button container not found');
+      return;
+    }
+    
+    // Clear existing content
+    buttonContainer.innerHTML = '';
+    
+    // Generate buttons for each provider
+    this.config.providers.forEach(provider => {
+      const button = document.createElement('button');
+      button.className = 'ni-auth-button';
+      button.setAttribute('data-provider-id', provider.id);
+      
+      const icon = document.createElement('span');
+      icon.className = `ni-provider-icon ni-icon-${provider.icon}`;
+      
+      const text = document.createElement('span');
+      text.className = 'ni-button-text';
+      text.textContent = `Continue with ${provider.name}`;
+      
+      button.appendChild(icon);
+      button.appendChild(text);
+      buttonContainer.appendChild(button);
+      
+      this.log('Created button for provider:', provider.id);
+    });
   }
 }
 

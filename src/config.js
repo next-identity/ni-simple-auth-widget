@@ -11,40 +11,46 @@ const NIWidgetConfig = {
   // Post logout redirect URI - where to redirect after logout
   postLogoutRedirectUri: window.location.origin + window.location.pathname,
   
-  // Debug mode - set to true to enable console logging
-  debug: true,
+  // Debug mode - set to false for production
+  debug: false,
   
   // Auth providers with their client IDs
   providers: [
     {
       id: 'google',
       name: 'Google',
-      clientId: 'ni-google-client-id',
+      clientId: 'your-google-client-id',
       icon: 'google'
     },
     {
       id: 'facebook',
       name: 'Facebook',
-      clientId: 'ni-facebook-client-id',
+      clientId: 'your-facebook-client-id',
       icon: 'facebook'
     },
     {
       id: 'microsoft',
       name: 'Microsoft',
-      clientId: 'ni-microsoft-client-id',
+      clientId: 'your-microsoft-client-id',
       icon: 'microsoft'
     },
     {
       id: 'amazon',
       name: 'Amazon',
-      clientId: 'ni-amazon-client-id',
+      clientId: 'your-amazon-client-id',
       icon: 'amazon'
     },
     {
       id: 'x',
       name: 'X',
-      clientId: 'ni-x-client-id',
+      clientId: 'your-x-client-id',
       icon: 'x'
+    },
+    {
+      id: 'nextidentity',
+      name: 'Next Identity',
+      clientId: 'your-nextidentity-client-id',
+      icon: 'nextidentity'
     }
   ],
   

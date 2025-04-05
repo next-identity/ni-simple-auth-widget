@@ -18,53 +18,85 @@ src/
 ├── config.js           # Configuration file for the widget
 ├── index.html          # Demo page showing the widget in action
 ├── css/
-│   └── ni-widget.css   # Styling for the widget
+│   ├── ni-widget.css   # Styling for the widget
+│   └── ni-widget.min.css # Minified CSS
 └── js/
-    └── ni-widget.js    # Core functionality of the widget
+    ├── ni-widget.js    # Core functionality of the widget
+    └── ni-widget.min.js # Minified JavaScript
 ```
 
 ## Quick Start
 
 1. Clone this repository or download the source code
-2. Copy the `src/js/ni-widget.js`, `src/css/ni-widget.css`, and `src/config.js` files to your project
+2. Copy the widget files to your project (minified versions recommended for production)
 3. Update `config.js` with your Next Identity provider details
-4. Include the files in your HTML:
+4. Choose an integration method below
+
+## Integration Methods
+
+You can integrate the Next Identity widget in two ways:
+
+### Method 1: Standard Integration
+
+This method provides a pre-structured widget DOM that you can style further if needed:
 
 ```html
-<link rel="stylesheet" href="path/to/ni-widget.css">
-<script src="path/to/config.js"></script>
-<script src="path/to/ni-widget.js"></script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Add the widget CSS -->
+  <link rel="stylesheet" href="path/to/ni-widget.min.css">
+</head>
+<body>
+  <!-- Widget container with predefined structure -->
+  <div class="ni-widget-container">
+    <div class="ni-widget-header">
+      <h2 class="ni-widget-title">Sign in</h2>
+      <p class="ni-widget-subtitle">Choose your preferred sign-in method</p>
+    </div>
+    
+    <div class="ni-auth-buttons">
+      <!-- Auth buttons will be dynamically generated -->
+    </div>
+    
+    <div class="ni-loading">
+      <div class="ni-spinner"></div>
+    </div>
+    
+    <div class="ni-error"></div>
+  </div>
+
+  <!-- Config script - Update path to your config file -->
+  <script src="path/to/config.js"></script>
+  
+  <!-- Widget script -->
+  <script src="path/to/ni-widget.min.js"></script>
+</body>
+</html>
 ```
 
-5. Add the widget HTML to your page:
+### Method 2: Minimal Integration
+
+For the most minimal integration, just add a single div with ID `ni-widget-root`:
 
 ```html
-<div class="ni-widget-container">
-  <div class="ni-widget-header">
-    <h2 class="ni-widget-title">Sign in</h2>
-    <p class="ni-widget-subtitle">Choose your preferred sign-in method</p>
-  </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Add the widget CSS -->
+  <link rel="stylesheet" href="path/to/ni-widget.min.css">
+</head>
+<body>
+  <!-- The widget will be entirely built inside this element -->
+  <div id="ni-widget-root"></div>
+
+  <!-- Config script - Update path to your config file -->
+  <script src="path/to/config.js"></script>
   
-  <div class="ni-auth-buttons">
-    <!-- Buttons will be dynamically generated based on config -->
-  </div>
-  
-  <!-- Loading indicator, error message, and user profile sections -->
-  <div class="ni-loading">
-    <div class="ni-spinner"></div>
-  </div>
-  
-  <div class="ni-error">
-    Authentication failed. Please try again.
-  </div>
-  
-  <div class="ni-user-profile">
-    <div class="ni-user-avatar"></div>
-    <div class="ni-user-name"></div>
-    <div class="ni-user-email"></div>
-    <button class="ni-logout-button">Sign Out</button>
-  </div>
-</div>
+  <!-- Widget script -->
+  <script src="path/to/ni-widget.min.js"></script>
+</body>
+</html>
 ```
 
 ## Configuration
@@ -73,13 +105,19 @@ The widget is configured using the `config.js` file. Here's an example configura
 
 ```javascript
 const NIWidgetConfig = {
-  // The single Next Identity issuer URL
-  issuerUrl: 'https://your-provider.com',
+  // Your Next Identity issuer URL
+  issuerUrl: 'https://your-issuer.nextidentity.io',
   
-  // Redirect URI - same page
+  // The redirect URI (typically the same page)
   redirectUri: window.location.origin + window.location.pathname,
   
-  // Auth providers with their client IDs
+  // Redirect URI for after logout
+  postLogoutRedirectUri: window.location.origin + window.location.pathname,
+  
+  // Enable debug logging for troubleshooting
+  debug: false,
+  
+  // Configure your authentication providers
   providers: [
     {
       id: 'google',
@@ -93,10 +131,34 @@ const NIWidgetConfig = {
       clientId: 'your-client-id-for-facebook',
       icon: 'facebook'
     },
+    {
+      id: 'microsoft',
+      name: 'Microsoft',
+      clientId: 'your-client-id-for-microsoft',
+      icon: 'microsoft'
+    },
+    {
+      id: 'amazon',
+      name: 'Amazon',
+      clientId: 'your-client-id-for-amazon',
+      icon: 'amazon'
+    },
+    {
+      id: 'x',
+      name: 'X',
+      clientId: 'your-client-id-for-x',
+      icon: 'x'
+    },
+    {
+      id: 'nextidentity',
+      name: 'Next Identity',
+      clientId: 'your-client-id-for-nextidentity',
+      icon: 'nextidentity'
+    }
     // Add more providers as needed
   ],
   
-  // Customization options
+  // UI customization options
   customization: {
     buttonRadius: '4px',
     buttonColor: '#4285F4',
@@ -105,14 +167,19 @@ const NIWidgetConfig = {
     widgetWidth: '300px'
   },
   
-  // Next Identity scope
+  // OpenID Connect scope
   scope: 'openid profile email',
   
-  // PKCE settings
+  // PKCE settings (don't change unless you know what you're doing)
   pkce: {
     challengeMethod: 'S256'
   }
 };
+
+// Make config available globally
+if (typeof window !== 'undefined') {
+  window.NIWidgetConfig = NIWidgetConfig;
+}
 ```
 
 ### Important Notes
@@ -153,6 +220,29 @@ document.addEventListener('ni:error', (event) => {
   console.error('Authentication error:', error);
   // Handle authentication errors
 });
+
+// When login process starts
+document.addEventListener('ni:login_initiated', (event) => {
+  const provider = event.detail.providerId;
+  console.log('Login initiated with provider:', provider);
+});
+```
+
+## API Methods
+
+The widget instance is available globally as `window.niWidget` and provides these methods:
+
+- `isAuthenticated()` - Check if user is authenticated
+- `getCurrentUser()` - Get the current user data
+- `logout()` - Log the user out
+
+Example usage:
+
+```javascript
+if (window.niWidget.isAuthenticated()) {
+  const user = window.niWidget.getCurrentUser();
+  console.log('User is authenticated:', user);
+}
 ```
 
 ## Customization

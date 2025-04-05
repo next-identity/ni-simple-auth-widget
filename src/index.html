@@ -3,286 +3,36 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Next Identity Authentication Widget Example</title>
+  <title>Next Identity Authentication</title>
   
   <!-- Widget CSS -->
-  <link rel="stylesheet" href="css/ni-widget.css">
-  
-  <!-- Demo page styling (not required for the widget) -->
-  <style>
-    body {
-      font-family: 'Roboto', sans-serif;
-      margin: 0;
-      padding: 20px;
-      background-color: #f5f5f5;
-    }
-    
-    .demo-container {
-      max-width: 800px;
-      margin: 0 auto;
-      background-color: #ffffff;
-      border-radius: 8px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-      padding: 20px;
-    }
-    
-    .demo-header {
-      text-align: center;
-      margin-bottom: 30px;
-    }
-    
-    .demo-title {
-      font-size: 2rem;
-      color: #333;
-      margin-bottom: 10px;
-    }
-    
-    .demo-subtitle {
-      font-size: 1rem;
-      color: #666;
-    }
-    
-    .example-section {
-      margin-top: 30px;
-      padding-top: 20px;
-      border-top: 1px solid #eee;
-    }
-    
-    .example-section h2 {
-      font-size: 1.5rem;
-      margin-bottom: 15px;
-    }
-    
-    pre {
-      background-color: #f8f9fa;
-      padding: 15px;
-      border-radius: 4px;
-      overflow-x: auto;
-      font-family: monospace;
-      font-size: 0.9rem;
-    }
-    
-    .note {
-      background-color: #e8f4fd;
-      padding: 12px;
-      border-radius: 4px;
-      margin-top: 15px;
-      font-size: 0.9rem;
-    }
-  </style>
+  <link rel="stylesheet" href="css/ni-widget.min.css">
 </head>
 <body>
-  <div class="demo-container">
-    <div class="demo-header">
-      <h1 class="demo-title">Next Identity Authentication Widget</h1>
-      <p class="demo-subtitle">A simple, customizable widget for Next Identity authentication</p>
+  <!-- Next Identity Widget Container -->
+  <div class="ni-widget-container">
+    <div class="ni-widget-header">
+      <h2 class="ni-widget-title">Sign in</h2>
+      <p class="ni-widget-subtitle">Choose your preferred sign-in method</p>
     </div>
     
-    <!-- WIDGET IMPLEMENTATION STARTS HERE -->
-    <div class="ni-widget-container">
-      <div class="ni-widget-header">
-        <h2 class="ni-widget-title">Sign in</h2>
-        <p class="ni-widget-subtitle">Choose your preferred sign-in method</p>
-      </div>
-      
-      <div class="ni-auth-buttons">
-        <!-- Buttons will be dynamically generated based on config -->
-      </div>
-      
-      <!-- Loading indicator -->
-      <div class="ni-loading">
-        <div class="ni-spinner"></div>
-      </div>
-      
-      <!-- Error message -->
-      <div class="ni-error">
-        Authentication failed. Please try again.
-      </div>
-      
-      <!-- User profile (displayed after successful authentication) -->
-      <div class="ni-user-profile">
-        <div class="ni-user-avatar"></div>
-        <div class="ni-user-name"></div>
-        <div class="ni-user-email"></div>
-        <button class="ni-logout-button">Sign Out</button>
-      </div>
+    <div class="ni-auth-buttons">
+      <!-- Auth buttons will be dynamically generated based on the config -->
     </div>
-    <!-- WIDGET IMPLEMENTATION ENDS HERE -->
-
-      <div class="note">
-        <strong>Note:</strong> This widget uses the Authorization Code flow with PKCE for secure authentication. 
-        The widget handles all aspects of the Next Identity flow, including token exchange and storing the authentication state securely.
-      </div>
+    
+    <!-- Loading indicator -->
+    <div class="ni-loading">
+      <div class="ni-spinner"></div>
     </div>
+    
+    <!-- Error message -->
+    <div class="ni-error"></div>
   </div>
+
+  <!-- Config Script - Update path to your config file -->
+  <script src="config.js"></script>
   
-  <!-- Config script -->
-  <script src="./config.js"></script>
-  
-  <!-- Widget script -->
-  <script src="./js/ni-widget.js"></script>
-  
-  <!-- Enhanced verification script -->
-  <script>
-    console.log('Debug check: JavaScript is loading');
-    
-    // Check if config is available
-    console.log('NIWidgetConfig available:', !!window.NIWidgetConfig);
-    if (window.NIWidgetConfig) {
-      console.log('Debug mode enabled:', window.NIWidgetConfig.debug);
-      console.log('Provider count:', window.NIWidgetConfig.providers.length);
-    } else {
-      console.error('ERROR: NIWidgetConfig not found - check config.js loading');
-    }
-    
-    // Check if widget class is defined
-    console.log('NIWidget class available:', typeof NIWidget !== 'undefined');
-    
-    // Verify widget initialization
-    document.addEventListener('DOMContentLoaded', () => {
-      console.log('DOM loaded');
-      
-      // Check widget instance
-      console.log('niWidget instance available:', !!window.niWidget);
-      
-      // Check buttons
-      const buttons = document.querySelectorAll('.ni-auth-button');
-      console.log('Found auth buttons:', buttons.length);
-      
-      // Check if buttons have proper attributes
-      if (buttons.length > 0) {
-        buttons.forEach(btn => {
-          console.log('Button:', btn.getAttribute('data-provider-id'));
-          
-          // Add a manual event listener to test button clicks
-          btn.addEventListener('click', (e) => {
-            console.log('Manual test: Button clicked:', btn.getAttribute('data-provider-id'));
-          });
-        });
-      } else {
-        console.error('No auth buttons found. Button generation may have failed.');
-      }
-      
-      // Force widget initialization if not already done
-      if (!window.niWidget && window.NIWidgetConfig && typeof NIWidget !== 'undefined') {
-        console.log('Manually initializing widget...');
-        window.niWidget = new NIWidget(window.NIWidgetConfig);
-      }
-    });
-  </script>
-  
-  <!-- Script to dynamically generate buttons -->
-  <script>
-    // Generate buttons dynamically based on config
-    document.addEventListener('DOMContentLoaded', () => {
-      if (window.NIWidgetConfig) {
-        const buttonContainer = document.querySelector('.ni-auth-buttons');
-        
-        // Clear existing content
-        buttonContainer.innerHTML = '';
-        
-        // Generate buttons for each provider
-        window.NIWidgetConfig.providers.forEach(provider => {
-          const button = document.createElement('button');
-          button.className = 'ni-auth-button';
-          button.setAttribute('data-provider-id', provider.id);
-          
-          const icon = document.createElement('span');
-          icon.className = `ni-provider-icon ni-icon-${provider.icon}`;
-          
-          const text = document.createElement('span');
-          text.className = 'ni-button-text';
-          text.textContent = `Continue with ${provider.name}`;
-          
-          button.appendChild(icon);
-          button.appendChild(text);
-          buttonContainer.appendChild(button);
-        });
-      }
-    });
-  </script>
-  
-  <!-- Demo script for event handling -->
-  <script>
-    // Example event listeners
-    document.addEventListener('ni:authenticated', (event) => {
-      const userData = event.detail.user;
-      console.log('User authenticated:', userData);
-      
-      // Update UI to show user is logged in
-      const userProfile = document.querySelector('.ni-user-profile');
-      const userName = document.querySelector('.ni-user-name');
-      const userEmail = document.querySelector('.ni-user-email');
-      const userAvatar = document.querySelector('.ni-user-avatar');
-      
-      // Display user info
-      if (userData.name) {
-        userName.textContent = userData.name;
-      }
-      
-      if (userData.email) {
-        userEmail.textContent = userData.email;
-      }
-      
-      if (userData.picture) {
-        userAvatar.style.backgroundImage = `url(${userData.picture})`;
-      }
-      
-      // Show profile section
-      userProfile.classList.add('active');
-      
-      // Hide buttons
-      document.querySelector('.ni-auth-buttons').style.display = 'none';
-    });
-    
-    document.addEventListener('ni:error', (event) => {
-      const error = event.detail;
-      console.error('Authentication error:', error);
-      
-      // Show error message
-      const errorElement = document.querySelector('.ni-error');
-      errorElement.textContent = error.errorDescription || 'Authentication failed. Please try again.';
-      errorElement.classList.add('active');
-      
-      // Hide loading
-      document.querySelector('.ni-loading').classList.remove('active');
-    });
-    
-    // Handle logout button
-    document.addEventListener('DOMContentLoaded', () => {
-      const logoutButton = document.querySelector('.ni-logout-button');
-      
-      logoutButton.addEventListener('click', () => {
-        // Call logout from widget
-        if (window.niWidget) {
-          window.niWidget.logout();
-          
-          // Reset UI
-          document.querySelector('.ni-user-profile').classList.remove('active');
-          document.querySelector('.ni-auth-buttons').style.display = 'flex';
-        }
-      });
-    });
-  </script>
-  
-  <!-- Direct widget initialization as a fallback -->
-  <script>
-    // Direct initialization as fallback - executed immediately after script loading
-    console.log('Attempting direct widget initialization...');
-    try {
-      if (typeof NIWidget === 'function' && window.NIWidgetConfig) {
-        if (!window.niWidget) {
-          console.log('Creating widget instance directly...');
-          window.niWidget = new NIWidget(window.NIWidgetConfig);
-        } else {
-          console.log('Widget already initialized');
-        }
-      } else {
-        console.error('Cannot initialize widget - NIWidget:', typeof NIWidget, 'Config:', !!window.NIWidgetConfig);
-      }
-    } catch (e) {
-      console.error('Error during direct widget initialization:', e);
-    }
-  </script>
+  <!-- Widget Script -->
+  <script src="js/ni-widget.min.js"></script>
 </body>
 </html> 
