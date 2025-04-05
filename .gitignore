@@ -1,5 +1,5 @@
 # Environment & test files
-config-logo-test.js
+config-local-test.js
 *.pem
 test-config.js
 
